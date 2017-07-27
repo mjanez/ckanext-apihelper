@@ -59,16 +59,20 @@ def extract_actions():
                         and (v.__module__ == module_path
                              or hasattr(v, '__replaced'))):
                     actions[action_module_name][k] = get_doc(k)
-        module_path = 'ckanext.harvest.logic.action.' + action_module_name
-        module = __import__(module_path)
-        for part in module_path.split('.')[1:]:
-            module = getattr(module, part)
-        for k, v in module.__dict__.items():
-            if check_function(k):
-                # Only load functions from the action module or already
-                # replaced functions.
-                if (hasattr(v, '__call__')
-                        and (v.__module__ == module_path
-                             or hasattr(v, '__replaced'))):
-                    actions[action_module_name][k] = get_doc(k)
+        try:
+            module_path = 'ckanext.harvest.logic.action.' + action_module_name
+            module = __import__(module_path)
+            for part in module_path.split('.')[1:]:
+                module = getattr(module, part)
+            for k, v in module.__dict__.items():
+                if check_function(k):
+                    # Only load functions from the action module or already
+                    # replaced functions.
+                    if (hasattr(v, '__call__')
+                            and (v.__module__ == module_path
+                                 or hasattr(v, '__replaced'))):
+                        actions[action_module_name][k] = get_doc(k)
+            break
+        except ImportError:
+            log.info('Skipping ckanext.harvest.logic.action')
     return actions
